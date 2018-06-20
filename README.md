@@ -112,20 +112,20 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
-
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
-
-I did not repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient. To expand the data set, I repeated some augmentation techniques from Lab 2. 
 
 The data collected by driving around the track is biased towards driving straight. This is evidenced by the fact that the car often doesn't turn enough (or sometimes not at all) to avoid driving through the curve and veering off the track. This is especially true of the biggest curves in the track. We need the car to be able to generalize to more driving conditions. I took the following steps to rebalance the dataset:
 
 1. Used the mouse instead of the keyboard for steering. The problem with the keyboard is that the left and right keys for steering are either pressed or they are not. This results in a data set which is fully of mostly zero degree steering angles (our y-labels) with very occassional higher steering angles thrown in. Using the mouse to drive the car creates a more natural experience where the driver has to maintain control over the steering angle at all times. This results in a continuous range of steering angles.
 2. Filter out a high percentage of straight driving steering angles. This took some experimentation but I found that filtering out 75% of steering angles less than 0.5 degrees worked.
+3. Drive a couple of laps with all "recovery" data. This means that I would drive the car towards the edge of the track, hit record, pull away from the edge of the track with a large steering angle, and then stop recording. The idea is to give the CNN examples of what to do in case the vehicle begins veering off the road since there aren't any examples of this scenario in normal straight biased driving. These images show what a recovery looks like starting from ... :
+4. and put 20% of the data into a validation set. 
 
-After the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
+![alt text][image3]
+![alt text][image4]
+![alt text][image5]
+
+
+I did not repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
 
 ##### CNN Training
 
@@ -148,16 +148,19 @@ The way Keras works, the ```fit_generator``` calls a generator function which yi
   ![alt text][image7]
 
     2. I also repeated some techniques from the traffic sign classfier lab (lab 2). I added a gaussian blurred and noisy versions of each image. I am not sure how quantifiably effective these methods were but it seems like I got enough good data.
-
     3. I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. and put 20% of the data into a validation set. 
-
-
-
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+    4. There are many more augmentation techniques which could have been used. However, you don't want to have a dataset larger than what you need to accomplish your task because of the increased time and complexity. I found that with these simple trechniques alone, I was successfully able to pull off a lap around the track. I did not attempt to drive around the challenge track but I know that it has varying lighting conditions that track 1 does not have. If I wanted the car to be able to drive around the challenge track, it would be a good idea to augment the training data with varying lighting conditions like I did in the traffic sign classifier project.
+    
+4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. 
 
 To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 40%. 
+
+I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
+
+I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, know how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
+
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... 
+
 
 
 
