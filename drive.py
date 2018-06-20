@@ -47,7 +47,7 @@ controller = SimplePIController(0.1, 0.002)
 set_speed = 9
 controller.set_desired(set_speed)
 
-
+from test_network import preprocess
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
@@ -61,6 +61,8 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = np.asarray(image)
+        image_array = preprocess(np.asarray(image))
+        image_array = image_array.reshape(image_array.shape[0],image_array.shape[1],1)
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
@@ -119,7 +121,9 @@ if __name__ == '__main__':
         print('You are using Keras version ', keras_version,
               ', but the model was built using ', model_version)
 
+    print("Loading your trained model.")
     model = load_model(args.model)
+    print("Done loading your trained model.")
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))

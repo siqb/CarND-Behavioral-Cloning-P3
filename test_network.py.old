@@ -1,0 +1,274 @@
+import csv
+import cv2
+import numpy as np
+
+
+def preprocess(input_img):
+    #input_img_roi = input_img[53:,]
+    #input_img_roi = input_img[80:130,10:310]
+    #input_img_roi = input_img[64:134,60:260]
+    input_img_roi = input_img[64:134,]
+    #input_img_roi = input_img
+    #print("image shape", input_img_roi.shape)
+    output_img = cv2.cvtColor(input_img_roi, cv2.COLOR_RGB2GRAY)
+    cv2.normalize(output_img, output_img, 0, 255, cv2.NORM_MINMAX)
+    return output_img
+
+def augment(input_img, input_angle):
+    
+    output_images, output_angles = [],[]
+
+    # Add center camera flipped images and angles to data set
+    image_flipped = np.fliplr(input_img)
+    angle_flipped = -input_angle
+    output_images.append(image_flipped)
+    output_angles.append(angle_flipped)
+
+    # Add blurred image
+    blurred = cv2.GaussianBlur(input_img, (5, 5), 0)
+    #cv2.imshow('blurred',blurred)
+    #cv2.waitKey(0)    
+    output_images.append(blurred)
+    output_angles.append(input_angle)
+    
+    # Add noisy image
+    noise = np.zeros_like(input_img)
+    cv2.randn(noise,(0),(45))
+    noisy_img = input_img+noise                    
+    #cv2.imshow('noisy',noisy_img)
+    #cv2.waitKey(0)    
+    output_images.append(noisy_img)
+    output_angles.append(input_angle)
+
+    return output_images, output_angles
+
+def generator(samples, batch_size=32):
+    print("in gen")
+    num_samples = len(lines)
+    while 1: # Loop forever so the generator never terminates
+        sklearn.utils.shuffle(lines)
+        for offset in range(0, num_samples, batch_size):
+            batch_samples = lines[offset:offset+batch_size]
+
+            images = []
+            angles = []
+            #correction = 0.15 # too much to the right (drives on right line)
+            #correction = 1.15 # a little to the right
+            #correction = 2.15 # all over the place
+            #correction = 1.75 # still too jittery
+            correction = 1.5
+            #for batch_sample in batch_samples:
+            #    # Add center camera images and angles to data set
+            #    center_name = '../IMG/'+batch_sample[0].split('/')[-1]
+            #    center_image = cv2.imread(center_name)
+            #    center_angle = float(batch_sample[3])
+            #    images.append(center_image)
+            #    angles.append(center_angle)
+
+            #    # Add center camera flipped images and angles to data set
+            #    center_image_flipped = np.fliplr(center_image)
+            #    center_angle_flipped = -center_angle
+            #    images.append(center_image_flipped)
+            #    angles.append(center_angle_flipped)
+            #    
+            #    # Add left camera images and angles to data set
+            #    left_name = '../IMG/'+batch_sample[1].split('/')[-1]
+            #    left_image = cv2.imread(left_name)
+            #    left_angle = float(batch_sample[3]) + correction
+            #    images.append(left_image)
+            #    angles.append(left_angle)
+
+            #    # Add left camera flipped images and angles to data set
+            #    left_image_flipped = np.fliplr(left_image)
+            #    left_angle_flipped = -left_angle
+            #    images.append(left_image_flipped)
+            #    angles.append(left_angle_flipped)
+
+            #    # Add right camera images and angles to data set
+            #    right_name = '../IMG/'+batch_sample[2].split('/')[-1]
+            #    right_image = cv2.imread(right_name)
+            #    right_angle = float(batch_sample[3]) - correction
+            #    images.append(right_image)
+            #    angles.append(right_angle)
+
+            #    # Add right camera flipped images and angles to data set
+            #    right_image_flipped = np.fliplr(right_image)
+            #    right_angle_flipped = -right_angle
+            #    images.append(right_image_flipped)
+            #    angles.append(right_angle_flipped)
+            CENTER = 0
+            LEFT = 1
+            RIGHT = 2
+
+            for batch_sample in batch_samples:
+                for cam in range(0,3):
+                    # Add center camera images and angles to data set
+                    #img_name = '../IMG/IMG/'+batch_sample[i].split('/')[-1]
+                    img_name = '../data/IMG/'+batch_sample[cam].split('/')[-1]
+                    img = cv2.imread(img_name)
+                    img_gray_norm = preprocess(img)
+                    #cv2.imshow('gray norm',img_gray_norm)
+                    #cv2.waitKey(0)    
+                    #img_angle = float(batch_sample[3]) + (float(i)+0.2 if i!=LEFT else float(-1))*correction
+                    if cam == CENTER:
+                        img_angle = float(batch_sample[3])
+                    elif cam == LEFT:
+                        img_angle = float(batch_sample[3]) + correction
+                    elif cam == RIGHT:
+                        img_angle = float(batch_sample[3]) - correction
+                    images.append(img_gray_norm)
+                    angles.append(img_angle)
+                    
+                    # Augment
+                    imgs_aug, angles_aug = augment(img_gray_norm, img_angle)
+                    images += imgs_aug
+                    angles += angles_aug
+
+            # trim image to only see section with road
+            X_train = np.array(images)
+            X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],X_train.shape[2],1)
+            y_train = np.array(angles)
+            #yield sklearn.utils.shuffle(X_train, y_train)
+            from sklearn.utils import shuffle
+            X_train, y_train = shuffle(X_train, y_train)
+            yield X_train, y_train
+ 
+if __name__ == '__main__':
+    lines = []
+    #with open('../IMG/driving_log.csv') as csvfile:
+    with open('../data/driving_log.csv') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)
+        for line in reader:
+            #lines.append(line)
+            temp_angle = float(line[3])
+            if((temp_angle > -0.8 or temp_angle < 0.8) and np.random.random() < 0.85):
+                continue
+            lines.append(line)
+    #images = []
+    #measurements = []
+    #
+    #for line in lines:
+    #    source_path = line[0]
+    #    filename = source_path.split('/')[-1]
+    #    current_path = '../IMG/' + filename
+    #    image = cv2.imread(current_path)
+    #    images.append(image)
+    #    measurement = float(line[3])
+    #    measurements.append(measurement)
+    #
+    #X_train = np.array(images)
+    #y_train = np.array(measurements)
+    
+    
+    import sklearn
+    
+    from sklearn.model_selection import train_test_split
+    train_samples, validation_samples = train_test_split(lines, test_size=0.2)
+
+    #batch_size = 32 
+    batch_size = 16 
+    train_generator = generator(train_samples, batch_size=batch_size)
+    validation_generator = generator(validation_samples, batch_size=batch_size)
+    
+    #for i in range(5):
+    #    print("hello")
+    #    (next(train_generator))
+    #    (next(validation_generator))
+    
+    from keras.models import Sequential
+    from keras.layers import Flatten, Dense, Lambda, Convolution2D, Activation, Cropping2D, BatchNormalization, Dropout
+    from keras.utils.visualize_util import plot
+    from keras.models import load_model
+    
+    model = Sequential()
+    ## Cropping speed up training by ~40 seconds
+    ## Cropping also helps the car get farther on the track
+    ##model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(107,320,1)))
+    #model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,1)))
+    ##model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160,320,3)))
+    ##model.add(Lambda(lambda x: x / 255.0 - 0.5))
+    #model.add(Lambda(lambda x: x / 127.5 - 1.)) #why?
+    
+    # Adding in strides (subsamples) and increasing batch size 8->32 
+    # sped up my training from ~1 hour to about ~1 minute
+    
+    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(107,320,1)))
+    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(50,300,1)))
+    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(70,200,1)))
+    model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(70,320,1)))
+    #model.add(Convolution2D(24,5,5,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    #model.add(Convolution2D(36,5,5))
+    model.add(Convolution2D(36,5,5,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    #model.add(Convolution2D(48,3,3))
+    model.add(Convolution2D(48,3,3,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    #model.add(Convolution2D(64,3,3))
+    model.add(Convolution2D(64,3,3,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    #model.add(Convolution2D(64,3,3))
+    model.add(Convolution2D(64,3,3,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(Flatten())
+    
+    # Added dense layers one by one (last to first)
+    
+    model.add(Dense(1164)) # Got to the bridge for the first time! But still fell in water :( 
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    #model.add(Dense(1000)) 
+    #model.add(Activation('relu'))
+    #model.add(Dropout(0.1))
+    model.add(Dense(100))  # Getting smoother, more right turns`
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(50))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(10))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(1)) # Erratic driving
+    
+    model.compile(loss='mse', optimizer='adam')
+    
+    #model.fit(X_train, y_train, batch_size=256, validation_split=0.2, shuffle=True, nb_epoch=5)
+    #model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
+    
+    import matplotlib.pyplot as plt
+    
+    trained_model = model.fit_generator(
+       train_generator, 
+       samples_per_epoch = (len(train_samples)//batch_size)*batch_size,
+       validation_data=validation_generator,
+       nb_val_samples=len(validation_samples),#deleted *6 
+       nb_epoch=5)
+    #  max_q_size=1)
+    
+       #samples_per_epoch = len(train_samples)*6,
+       #nb_val_samples=len(validation_samples)*6, 
+
+    model.save('model.h5')
+    ##visualize the model
+    #modelobj = load_model('model.h5')
+    #plot (modelobj, to_file='model.png')
+    
+    ### print the keys contained in the history object
+    print(trained_model.history.keys())
+    
+    ### plot the training and validation loss for each epoch
+    plt.plot(trained_model.history['loss'])
+    plt.plot(trained_model.history['val_loss'])
+    plt.title('model mean squared error loss')
+    plt.ylabel('mean squared error loss')
+    plt.xlabel('epoch')
+    plt.legend(['training set', 'validation set'], loc='upper right')
+    plt.show()
+    
