@@ -1,6 +1,7 @@
 import csv
 import cv2
 import numpy as np
+from sklearn.utils import shuffle
 
 
 def preprocess(input_img):
@@ -27,8 +28,6 @@ def augment(input_img, input_angle):
 
     # Add blurred image
     blurred = cv2.GaussianBlur(input_img, (5, 5), 0)
-    #cv2.imshow('blurred',blurred)
-    #cv2.waitKey(0)    
     output_images.append(blurred)
     output_angles.append(input_angle)
     
@@ -36,20 +35,18 @@ def augment(input_img, input_angle):
     noise = np.zeros_like(input_img)
     cv2.randn(noise,(0),(45))
     noisy_img = input_img+noise                    
-    #cv2.imshow('noisy',noisy_img)
-    #cv2.waitKey(0)    
     output_images.append(noisy_img)
     output_angles.append(input_angle)
 
     return output_images, output_angles
 
-def generator(samples, batch_size=32, gen_type="train"):
+def generator(samples, BATCH_SIZE=32, gen_type="train"):
     print("in gen")
     num_samples = len(lines)
     while 1: # Loop forever so the generator never terminates
         sklearn.utils.shuffle(lines)
-        for offset in range(0, num_samples, batch_size):
-            batch_samples = lines[offset:offset+batch_size]
+        for offset in range(0, num_samples, BATCH_SIZE):
+            batch_samples = lines[offset:offset+BATCH_SIZE]
 
             images = []
             angles = []
@@ -70,8 +67,6 @@ def generator(samples, batch_size=32, gen_type="train"):
                     img_name = '../data/IMG/'+batch_sample[cam].split('/')[-1]
                     img = cv2.imread(img_name)
                     img_gray_norm = preprocess(img)
-                    #cv2.imshow('gray norm',img_gray_norm)
-                    #cv2.waitKey(0)    
                     if cam == CENTER:
                         img_angle = float(batch_sample[3])
                     elif cam == LEFT:
@@ -91,9 +86,7 @@ def generator(samples, batch_size=32, gen_type="train"):
             X_train = np.array(images)
             X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],X_train.shape[2],1)
             y_train = np.array(angles)
-            #yield sklearn.utils.shuffle(X_train, y_train)
             print("Total number of",gen_type,"samples in batch after data augmentation:", len(X_train)) 
-            from sklearn.utils import shuffle
             X_train, y_train = shuffle(X_train, y_train)
             yield X_train, y_train
  
@@ -114,11 +107,9 @@ if __name__ == '__main__':
     from sklearn.model_selection import train_test_split
     train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
-    batch_size = 32 
-    #batch_size = 16 
-    #batch_size = 64
-    train_generator = generator(train_samples, batch_size=batch_size, gen_type="train")
-    validation_generator = generator(validation_samples, batch_size=batch_size, gen_type="valid")
+    BATCH_SIZE = 32 
+    train_generator = generator(train_samples, batch_size=BATCH_SIZE, gen_type="train")
+    validation_generator = generator(validation_samples, batch_size=BATCH_SIZE, gen_type="valid")
 
     print("Total number of training samples before data augmentation:", len(train_samples)) 
     print("Total number of validation samples before data augmentation:", len(validation_samples)) 
@@ -129,41 +120,23 @@ if __name__ == '__main__':
     from keras.models import load_model
     
     model = Sequential()
-    ## Cropping speed up training by ~40 seconds
-    ## Cropping also helps the car get farther on the track
-    ##model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(107,320,1)))
-    #model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,1)))
-    ##model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160,320,3)))
-    ##model.add(Lambda(lambda x: x / 255.0 - 0.5))
-    #model.add(Lambda(lambda x: x / 127.5 - 1.)) #why?
-    
+    # Cropping speed up training by ~40 seconds
+    # Cropping also helps the car get farther on the track
+    # However, I decided not to use the Keras function for cropping
+    # and perform it manually in drive.py instead
+
     # Adding in strides (subsamples) and increasing batch size 8->32 
     # sped up my training from ~1 hour to about ~1 minute
     
-    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(107,320,1)))
-    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(50,300,1)))
-    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(70,200,1)))
-    #model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(70,320,1)))
     model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(64,64,1)))
-    #model.add(Convolution2D(24,5,5,subsample=(2, 2)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(Convolution2D(36,5,5))
     model.add(Convolution2D(36,5,5,subsample=(2, 2)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(Convolution2D(48,3,3))
     model.add(Convolution2D(48,3,3,subsample=(2, 2)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    #model.add(Convolution2D(64,3,3))
-    #model.add(Convolution2D(64,3,3,subsample=(2, 2)))
-    #model.add(BatchNormalization())
-    #model.add(Activation('relu'))
-    ##model.add(Convolution2D(64,3,3))
-    #model.add(Convolution2D(64,3,3,subsample=(2, 2)))
-    #model.add(BatchNormalization())
-    #model.add(Activation('relu'))
     model.add(Flatten())
     
     # Added dense layers one by one (last to first)
@@ -171,9 +144,6 @@ if __name__ == '__main__':
     model.add(Dense(1164)) # Got to the bridge for the first time! But still fell in water :( 
     model.add(Activation('relu'))
     model.add(Dropout(0.1))
-    #model.add(Dense(1000)) 
-    #model.add(Activation('relu'))
-    #model.add(Dropout(0.1))
     model.add(Dense(100))  # Getting smoother, more right turns`
     model.add(Activation('relu'))
     model.add(Dropout(0.1))
@@ -184,30 +154,18 @@ if __name__ == '__main__':
     model.add(Activation('relu'))
     model.add(Dropout(0.1))
     model.add(Dense(1)) # Erratic driving
-    
     model.compile(loss='mse', optimizer='adam')
-    
-    #model.fit(X_train, y_train, batch_size=256, validation_split=0.2, shuffle=True, nb_epoch=5)
-    #model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
     
     import matplotlib.pyplot as plt
     
     trained_model = model.fit_generator(
        train_generator, 
-       samples_per_epoch = ((len(train_samples)*12)//batch_size)*batch_size,
+       samples_per_epoch = ((len(train_samples)*12)//BATCH_SIZE)*BATCH_SIZE,
        validation_data=validation_generator,
        nb_val_samples=len(validation_samples),#deleted *6 
        nb_epoch=5)
-    #  max_q_size=1)
-    
-       #samples_per_epoch = (len(train_samples)//batch_size)*batch_size,
-       #samples_per_epoch = len(train_samples)*6,
-       #nb_val_samples=len(validation_samples)*6, 
 
     model.save('model.h5')
-    ##visualize the model
-    #modelobj = load_model('model.h5')
-    #plot (modelobj, to_file='model.png')
     
     ### print the keys contained in the history object
     print(trained_model.history.keys())
