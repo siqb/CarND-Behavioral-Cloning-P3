@@ -21,7 +21,7 @@ The goals / steps of this project are the following:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 
-#### 1. This repo includes all required files to run the simulator in autonomous mode
+#### This repo includes all required files to run the simulator in autonomous mode
 
 My project includes the following files:
 * model.py containing the script to create and train the model
@@ -37,7 +37,7 @@ This repository comes with trained model which you can directly test using the f
 
 ### Model Architecture and Training Strategy
 
-#### 1. Solution Design Approach
+#### Solution Design Approach
 
 The overall strategy for deriving a model architecture was to first start with the NVIDIA architecture as a baseline and then refine it from there. 
 
@@ -53,7 +53,7 @@ The final step was to run the simulator to see how well the car was driving arou
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
-#### 2. Model Architecture
+#### Model Architecture
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
@@ -99,7 +99,7 @@ The main differences from the published architecture are:
 * Use of dropout
 
 
-#### 3. Creation of the Training Set & Training Process
+#### Creation of the Training Set & Training Process
 
 ##### Data Collection
 
