@@ -26,6 +26,12 @@ The goals / steps of this project are the following:
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
+## How to Run the Model
+
+This repository comes with trained model which you can directly test using the following command.
+
+    python drive.py model.h5
+
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
@@ -60,6 +66,58 @@ The model includes RELU layers to introduce nonlinearity (code line 20), and the
 
 I followed the NVIDIA arhcitecture
 
+1. Input image of 64x64x1
+2. Convolutional layer with 5x5 kernel and 24 filters
+3. Batch normalization
+4. ReLU activation
+5. Convolutional layer with 5x5 kernel and 36 filters
+6. Batch normalization
+7. ReLU activation
+8. Convolutional layer with 5x5 kernel and 48 filters
+9. Batch normalization
+10. ReLU activation
+11. Dense layer of 1164
+12. ReLU activation
+13. Droput with 10% keep probability
+14. Dense layer of 100
+15. ReLU activation
+16. Droput with 10% keep probability
+17. Dense layer of 50
+18. ReLU activation
+19. Droput with 10% keep probability
+20. Dense layer of 10
+21. ReLU activation
+22. Droput with 10% keep probability
+23. Dense layer of 1
+
+Here's how it looks in code:
+
+    model = Sequential()
+    model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(64,64,1)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(Convolution2D(36,5,5,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(Convolution2D(48,3,3,subsample=(2, 2)))
+    model.add(BatchNormalization())
+    model.add(Activation('relu'))
+    model.add(Flatten())
+    model.add(Dense(1164))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(100))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(50))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(10))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.1))
+    model.add(Dense(1))
+
+
 #### 2. Attempts to reduce overfitting in the model
 
 The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
@@ -67,10 +125,9 @@ The model contains dropout layers in order to reduce overfitting (model.py lines
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 
-
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually. I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
 
 #### 4. Appropriate training data
 
@@ -82,7 +139,7 @@ For details about how I created the training data, see the next section.
 
 #### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to first start with the NVIDIA architecture as a baseline and then refine it from there. 
 
 My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
 
@@ -153,9 +210,9 @@ The way Keras works, the ```fit_generator``` calls a generator function which yi
     
 4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. 
 
-To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 40%. 
+To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 10%. 
 
-I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
+
 
 I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, know how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
 
