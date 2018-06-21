@@ -1,11 +1,5 @@
 # **Behavioral Cloning** 
-
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
-
 **Behavioral Cloning Project**
 
 The goals / steps of this project are the following:
@@ -26,19 +20,8 @@ The goals / steps of this project are the following:
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
-## How to Run the Model
 
-This repository comes with trained model which you can directly test using the following command.
-
-    python drive.py model.h5
-
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
-
----
-### Files Submitted & Code Quality
-
-#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
+#### 1. This repo includes all required files to run the simulator in autonomous mode
 
 My project includes the following files:
 * model.py containing the script to create and train the model
@@ -46,51 +29,44 @@ My project includes the following files:
 * model.h5 containing a trained convolution neural network 
 * README.md (the file you are reading right now) summarizing the results
 
-#### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
-python drive.py model.h5
-```
+## How to Run the Model
 
-#### 3. Submission code is usable and readable
+This repository comes with trained model which you can directly test using the following command.
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+    python drive.py model.h5
 
 ### Model Architecture and Training Strategy
 
-#### 1. An appropriate model architecture has been employed
+#### 1. Solution Design Approach
+
+The overall strategy for deriving a model architecture was to first start with the NVIDIA architecture as a baseline and then refine it from there. 
+
+My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+
+To combat the overfitting, I modified the model so that ...
+
+Then I ... 
+
+The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+
+At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+
+#### 2. Model Architecture
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
 The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
 
-I followed the NVIDIA arhcitecture
+I did not use the Keras ```Lambda``` layer for data normalization or the Keras ```Cropping2D``` for cropping because I implemented a seperate preprocessing function using more traditional techniques to perform these tasks instead. This same preprocessing function is called during training and inference. There may be a performance penalty to using this approach over Keras but I chose this way because I felt more comfortable with it at the time. If I were to go back and redo this part, I would try in Keras and benchmark the performance difference. 
 
-1. Input image of 64x64x1
-2. Convolutional layer with 5x5 kernel and 24 filters
-3. Batch normalization
-4. ReLU activation
-5. Convolutional layer with 5x5 kernel and 36 filters
-6. Batch normalization
-7. ReLU activation
-8. Convolutional layer with 5x5 kernel and 48 filters
-9. Batch normalization
-10. ReLU activation
-11. Dense layer of 1164
-12. ReLU activation
-13. Droput with 10% keep probability
-14. Dense layer of 100
-15. ReLU activation
-16. Droput with 10% keep probability
-17. Dense layer of 50
-18. ReLU activation
-19. Droput with 10% keep probability
-20. Dense layer of 10
-21. ReLU activation
-22. Droput with 10% keep probability
-23. Dense layer of 1
+I followed the NVIDIA arhcitecture with some modifications. For reference, here is the architecture as published on the NVIDIA blog:
 
-Here's how it looks in code:
+![alt text][image6]
+
+
+Here's how my implementation looks in code:
 
     model = Sequential()
     model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(64,64,1)))
@@ -117,53 +93,17 @@ Here's how it looks in code:
     model.add(Dropout(0.1))
     model.add(Dense(1))
 
+The main differences from the published architecture are:
 
-#### 2. Attempts to reduce overfitting in the model
+* Use of batch normalization
+* Use of dropout
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-
-#### 3. Model parameter tuning
-
-The model used an adam optimizer, so the learning rate was not tuned manually. I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
-
-#### 4. Appropriate training data
-
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road as was recommended by the course lectures. T 
-
-For details about how I created the training data, see the next section. 
-
-### Model Architecture and Training Strategy
-
-#### 1. Solution Design Approach
-
-The overall strategy for deriving a model architecture was to first start with the NVIDIA architecture as a baseline and then refine it from there. 
-
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-#### 2. Final Model Architecture
-
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
 
 #### 3. Creation of the Training Set & Training Process
 
 ##### Data Collection
+
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road as was recommended by the course lectures
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
@@ -210,15 +150,21 @@ The way Keras works, the ```fit_generator``` calls a generator function which yi
     
 4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. 
 
-To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 10%. 
+##### Overfitting
 
+To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 10%. 
+The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+
+The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
+##### Parameter Tuning
 
 
 I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, know how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... 
 
-
+The model used an adam optimizer, so the learning rate was not tuned manually. I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
 
 
 
