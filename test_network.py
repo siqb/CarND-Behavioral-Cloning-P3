@@ -5,6 +5,14 @@ from sklearn.utils import shuffle
 
 
 def preprocess(input_img):
+    """
+    
+    Crop down the image in the rows (y) direction. As you can see,
+    I tried many different ROIs. Every time I tried cropping in the
+    cols (x) direction, a significant part of the lane lines would
+    get cut out.
+
+    """
     #input_img_roi = input_img[53:,]
     #input_img_roi = input_img[80:130,10:310]
     #input_img_roi = input_img[64:134,60:260]
