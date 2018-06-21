@@ -105,10 +105,7 @@ The main differences from the published architecture are:
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road as was recommended by the course lectures
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
-
-![alt text][image2]
-
+To capture good driving behavior, I first recorded two laps on track one using center lane driving.
 
 The data collected by driving around the track is biased towards driving straight. This is evidenced by the fact that the car often doesn't turn enough (or sometimes not at all) to avoid driving through the curve and veering off the track. This is especially true of the biggest curves in the track. We need the car to be able to generalize to more driving conditions. I took the following steps to rebalance the dataset:
 
@@ -122,7 +119,7 @@ The data collected by driving around the track is biased towards driving straigh
 ![alt text][image5]
 
 
-I did not repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
+I did **not** repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient for the purpose of driving a lap around track 1. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
 
 ##### CNN Training
 
@@ -153,18 +150,22 @@ The way Keras works, the ```fit_generator``` calls a generator function which yi
 ##### Overfitting
 
 To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 10%. 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ##### Parameter Tuning
 
-
-I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, know how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... 
+I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, knowing how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
 
 The model used an adam optimizer, so the learning rate was not tuned manually. I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
 
+##### Training Time
 
+As alluded to several times throughout this write up, the main problem I had with this lab was the inability to do fast iterations of experiments. It is well known that deep learning is largely experimental...but it's hard to experiment if it takes too long to train!
+
+My hardware is a four year old laptop with Intel Core i7 CPU and an NVIDIA GeForce GT 740M GPU running Ubuntu 16.04. I am not a gamer so this computer has served me well...until now. If I recall correctly, this laptop costed me somewhere in the range of $700 - $800. Clearly, anything in this price range is going to be relatively underpowered and can't be used for any heavy lifting. Even the highest end gaming laptops are underpowered compared to the computing potential of a desktop system. Although I don't have the $$$ to burn on a fancy new system just for running neural networks, I just got a fancy new desktop system with a heavy duty GPU at work that I can tinker around with. I am hoping to go back and fine tune this lab on my work computer when I get a chance. I hope to update this repo with results! 
+
+In the beginning when I was first experimenting with CNN architectures, I recall that a single epoch could take 15+ minutes meaning that just a few epochs would take well over an hour! As I began to refine the model, I _eventually_ got training time to about three or four minutes per epoch. However, this is still not fast enough for rapid experimentation and tuning of parameters.
+
+I tried experimenting with the batch size to speed up training. I pushed it all the way up to 128 but did not see a noticeable performance increase. When I pushed it beyond 128 (i.e. 256), my GPU ran out of memory. I also noticed that if I had Jupyter notebooks running in the background (i.e. lab 2), then the GPU would also run out of memory regardless of batch size, even if the notebook wasn't actively executing. I guess the notebook was just holding allocated memory and not letting it go. 
 
