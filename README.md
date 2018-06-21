@@ -1,12 +1,16 @@
-# **Behavioral Cloning** 
+# ** Autonomous Vehicle Behavioral Cloning** 
+
+[image7]: ./examples/parked_car.png "Autonomous Vehicle"
+
 ---
 **Behavioral Cloning Project**
 
-The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
-* Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
+The goals / steps of this project are to:
+
+* Use the simulator to collect data of good human driving behavior
+* Build a convolution neural network in Keras that predicts steering angles from images
+* Train and validate the neural network with a training and validation set
+* Test that the simulated vehicle successfully drives a lap around track one without leaving the road
 
 [//]: # (Image References)
 
@@ -34,31 +38,29 @@ This repo contains the following files:
 
 ## How to Run the Model
 
-This repository comes with fully trained model which you can directly test using the following command.
+First, download and install the Udacity starter kit for term 1 from here: https://github.com/siqb/CarND-Term1-Starter-Kit.
+
+Next, you can test the pre-trained neural network found in the repo simply by executing the following command:
 
     python drive.py model.h5
 
-After executing this command just launch the simulator and click "Autonomous Mode." Then watch the magic begin.
+Now just launch the simulator and click "Autonomous Mode" and watch the autonomous magic begin.
+
+[image7]: ./examples/simulator.png "Autonomous Vehicle"
 
 ### Model Architecture and Training Strategy
 
 #### Design Approach
 
-The overall strategy for deriving a model architecture was to first rebuild the NVIDIA architecture from the bottom up, i.e. one layer at a time, to observe what role each component played in the end result. Then once I rebuilt the entire architecture, I modified it and fine tuned parameters until I could get the car to drive around the track. Long story short: it wasn't very pretty to do it this way. My approach seems to make sense in theory but only for those who are endowed with sufficient compute capability in their development environments. You'll read more on this point towards the end of (and throughout!) this README....
+The overall strategy for deriving a model architecture was to first rebuild the NVIDIA architecture from the bottom up, i.e. one layer at a time, to observe what cumulative role each component played in the end result. Then once I rebuilt the entire architecture, I modified it and fine tuned parameters until I could get the car to drive around the track. Long story short: it wasn't very pretty to do it this way. My approach seems to make sense in theory but perhaps only for those who are endowed with sufficient compute capability in their development environments. You'll read more on this point towards the end of (and throughout!) this README....
 
-I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. To combat the overfitting, I modified the model so that ...
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 #### Model Architecture
 
-I followed the NVIDIA architecture with some modifications. As I mentioned above, I built it up backwards, from the last layer to the first which is a painfully slow way of doing it. For reference, here is a diagram of the architecture as published on the NVIDIA blog:
+I replicated the NVIDIA architecture with some modifications. As I mentioned above, I built it up backwards, from the last layer to the first which is a painfully slow way of doing it. For reference, here is a diagram of the architecture as published on the NVIDIA blog:
 
 ![alt text][image6]
 
@@ -91,12 +93,12 @@ Here's how my implementation looks in code:
 
 The main differences from the published architecture are:
 
-* ReLU
-** The NVIDIA paper doesn't specify what kind of activation function to use as the non-linearity but ReLUs are usually a pretty good bet for most applications 
+* Use of ReLU
+    * The NVIDIA paper doesn't specify what kind of activation function was used as the non-linearity but ReLUs are usually a pretty good bet for most applications. There's a good chance ReLUs were used in the original architecture. 
 * Use of batch normalization
-** To increase the stability of a neural network, batch normalization normalizes the output of a previous activation layer by subtracting the batch mean and dividing by the batch standard deviation. Batch normalization is kind of like doing preprocessing at every layer of the network instead of just the input layer. I found (this)[https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c] to be an excellent explanation. The end result is less interdependency of network layers on each other...**less overfitting!**
+    * To increase the stability of a neural network, batch normalization normalizes the output of a previous activation layer by subtracting the batch mean and dividing by the batch standard deviation. Batch normalization is kind of like doing preprocessing at every layer of the network instead of just the input layer. I found (this)[https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c] to be an excellent explanation. The end result is less interdependency of network layers on each other...**less overfitting!**
 * Use of dropout
-** Dropout is an algorithm which disables a certain percentage of randomly sampled neurons during each epoch. This means that the optimizer is performing gradient descent on effectively several different neural networks. In the end, the results of these different networks are combined. The end result is less interdependency of neurons on each other...**less overfitting!**
+    * Dropout is an algorithm which disables a certain percentage of randomly sampled neurons during each epoch. This means that the optimizer is performing gradient descent on effectively several different neural networks. In the end, the results of these different networks are combined. The end result is less interdependency of neurons on each other...**less overfitting!**
 
 A critical addition that I left out, which in retrospect I was probably errant to exclude, is the max pooling layer. Max pooling allows the network to reduce dimensionality of the data after each convolutional layer. Less trainable parameters means less training time. Less training time means more time for rapid experimentation! More experimentaion means more knowledge and intuition gained. Lesson learned. I will go back and benchmark the difference in training time when using max pooling layers. 
 
