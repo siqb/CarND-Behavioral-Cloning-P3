@@ -21,17 +21,24 @@ The goals / steps of this project are the following:
 
 #### This repo includes all required files to run the simulator in autonomous mode
 
-My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* README.md (the file you are reading right now) summarizing the results
+This repo contains the following files:
+
+* model.py - contains the script to create and train the model
+* drive.py - for driving the car in autonomous mode
+* model.h5 - contains my pre-trained convolution neural network 
+* README.md - the file you are reading right now summarizing the results
+* data.zip - the dataset which Udacity generoulsy provided for the purpose of validating the architecture
+* training_data.zip - the dataset which I painstakingly collected by hand
+* output_video.mp4 - video of the car _**safely**_ doing a lap around track 1
+* linux_sim.zip - the simulator provided by Udacity for collecting data and driving the vehicle autonomously around the track
 
 ## How to Run the Model
 
-This repository comes with trained model which you can directly test using the following command.
+This repository comes with fully trained model which you can directly test using the following command.
 
     python drive.py model.h5
+
+After executing this command just launch the simulator and click "Autonomous Mode." Then watch the magic begin.
 
 ### Model Architecture and Training Strategy
 
@@ -39,11 +46,7 @@ This repository comes with trained model which you can directly test using the f
 
 The overall strategy for deriving a model architecture was to first rebuild the NVIDIA architecture from the bottom up, i.e. one layer at a time, to observe what role each component played in the end result. Then once I rebuilt the entire architecture, I modified it and fine tuned parameters until I could get the car to drive around the track. Long story short: it wasn't very pretty to do it this way. My approach seems to make sense in theory but only for those who are endowed with sufficient compute capability in their development environments. You'll read more on this point towards the end of (and throughout!) this README....
 
-
-
-
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
 To combat the overfitting, I modified the model so that ...
 
@@ -123,9 +126,11 @@ The data collected by driving around the track is biased towards driving straigh
 
 I did **not** repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient for the purpose of driving a lap around track 1. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
 
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set.
+
 ##### CNN Training
 
-The way Keras works, the ```fit_generator``` calls a generator function which yields the training samples on a batch by batch basis until all of the training data is exhausted. The generator pipeline has several basic functions:
+The way Keras works, ```fit_generator()``` calls a user defined generator function which yields the training samples on a batch by batch basis until all of the training data is exhausted. The generator pipeline has several basic functions:
 
 1. Loads training samples for all three cameras by the batch.
 2. Preprocess the image by running it through a short preprocessing pipeline:
