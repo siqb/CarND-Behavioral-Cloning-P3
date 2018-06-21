@@ -7,8 +7,6 @@ The goals / steps of this project are the following:
 * Build, a convolution neural network in Keras that predicts steering angles from images
 * Train and validate the model with a training and validation set
 * Test that the model successfully drives around track one without leaving the road
-* Summarize the results with a written report
-
 
 [//]: # (Image References)
 
@@ -37,11 +35,13 @@ This repository comes with trained model which you can directly test using the f
 
 ### Model Architecture and Training Strategy
 
-#### Solution Design Approach
+#### Design Approach
 
-The overall strategy for deriving a model architecture was to first start with the NVIDIA architecture as a baseline and then refine it from there. 
+The overall strategy for deriving a model architecture was to first rebuild the NVIDIA architecture from the bottom up, i.e. one layer at a time, to observe what role each component played in the end result. Then once I rebuilt the entire architecture, I modified it and fine tuned parameters until I could get the car to drive around the track. Long story short: it wasn't very pretty to do it this way. My approach seems to make sense in theory but only for those who are endowed with sufficient compute capability in their development environments. You'll read more on this point towards the end of (and throughout!) this README....
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+
+
+
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
@@ -55,16 +55,9 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 #### Model Architecture
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
-
-I did not use the Keras ```Lambda``` layer for data normalization or the Keras ```Cropping2D``` for cropping because I implemented a seperate preprocessing function using more traditional techniques to perform these tasks instead. This same preprocessing function is called during training and inference. There may be a performance penalty to using this approach over Keras but I chose this way because I felt more comfortable with it at the time. If I were to go back and redo this part, I would try in Keras and benchmark the performance difference. 
-
-I followed the NVIDIA arhcitecture with some modifications. For reference, here is the architecture as published on the NVIDIA blog:
+I followed the NVIDIA architecture with some modifications. As I mentioned above, I built it up backwards, from the last layer to the first which is a painfully slow way of doing it. For reference, here is a diagram of the architecture as published on the NVIDIA blog:
 
 ![alt text][image6]
-
 
 Here's how my implementation looks in code:
 
@@ -95,9 +88,18 @@ Here's how my implementation looks in code:
 
 The main differences from the published architecture are:
 
+* ReLU
+** The NVIDIA paper doesn't specify what kind of activation function to use as the non-linearity but ReLUs are usually a pretty good bet for most applications 
 * Use of batch normalization
+** To increase the stability of a neural network, batch normalization normalizes the output of a previous activation layer by subtracting the batch mean and dividing by the batch standard deviation. Batch normalization is kind of like doing preprocessing at every layer of the network instead of just the input layer. I found (this)[https://towardsdatascience.com/batch-normalization-in-neural-networks-1ac91516821c] to be an excellent explanation. The end result is less interdependency of network layers on each other...**less overfitting!**
 * Use of dropout
+** Dropout is an algorithm which disables a certain percentage of randomly sampled neurons during each epoch. This means that the optimizer is performing gradient descent on effectively several different neural networks. In the end, the results of these different networks are combined. The end result is less interdependency of neurons on each other...**less overfitting!**
 
+A critical addition that I left out, which in retrospect I was probably errant to exclude, is the max pooling layer. Max pooling allows the network to reduce dimensionality of the data after each convolutional layer. Less trainable parameters means less training time. Less training time means more time for rapid experimentation! More experimentaion means more knowledge and intuition gained. Lesson learned. I will go back and benchmark the difference in training time when using max pooling layers. 
+
+##### Preprocessing
+
+I did not use the Keras ```Lambda``` layer for data normalization or the Keras ```Cropping2D``` for cropping because I implemented a seperate preprocessing function using more traditional techniques to perform these tasks instead. This same preprocessing function is called during training and inference. There may be a performance penalty to using this approach over Keras but I chose this way because I felt more comfortable with it at the time. If I were to go back and redo this part, I would try in Keras and benchmark the performance difference. 
 
 #### Creation of the Training Set & Training Process
 
