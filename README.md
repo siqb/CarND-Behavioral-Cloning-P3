@@ -1,6 +1,6 @@
 # Autonomous Vehicle Behavioral Cloning
 
-[image7]: ./examples/parked_car.png "Autonomous Vehicle"
+![alt text][image11]
 
 ---
 **Behavioral Cloning Project**
@@ -21,6 +21,14 @@ The goals / steps of this project are to:
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
+
+
+[image8]: ./pics/center_2016_12_01_13_30_48_287.jpg "Center Camera Image"
+[image9]: ./pics/left_2016_12_01_13_30_48_287.jpg "Left Camera Image"
+[image10]: ./pics/right_2016_12_01_13_30_48_287.jpg "Right Camera Image"
+[image11]: ./pics/parked_car.png "Autonomous Vehicle"
+[image12]: ./pics/simulator.png "Simulator"
+[image13]: ./pics/cnn-architecture-624x890.png "Simulator"
 
 
 ### This repo includes all required files to run the simulator in autonomous mode
@@ -46,7 +54,7 @@ Next, you can test the pre-trained neural network found in the repo simply by ex
 
 Now just launch the simulator and click "Autonomous Mode" and watch the autonomous magic begin.
 
-[image7]: ./examples/simulator.png "Autonomous Vehicle"
+![alt text][image12]
 
 ### Model Architecture and Training Strategy
 
@@ -62,7 +70,7 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 I replicated the NVIDIA architecture with some modifications. As I mentioned above, I built it up backwards, from the last layer to the first which is a painfully slow way of doing it. For reference, here is a diagram of the architecture as published on the NVIDIA blog:
 
-![alt text][image6]
+![alt text][image13]
 
 Here's how my implementation looks in code:
 
@@ -121,9 +129,11 @@ The data collected by driving around the track is biased towards driving straigh
 3. Drive a couple of laps with all "recovery" data. This means that I would drive the car towards the edge of the track, hit record, pull away from the edge of the track with a large steering angle, and then stop recording. The idea is to give the CNN examples of what to do in case the vehicle begins veering off the road since there aren't any examples of this scenario in normal straight biased driving. These images show what a recovery looks like starting from ... :
 4. and put 20% of the data into a validation set. 
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+The car has three camera...one in the center, one on the left, and one on the rihgt. Here is an example of what the car sees from all three cameras.
+
+![alt text][image8]
+![alt text][image9]
+![alt text][image10]
 
 
 I did **not** repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient for the purpose of driving a lap around track 1. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
