@@ -129,10 +129,12 @@ The data collected by driving around the track is biased towards driving straigh
 3. Drive a couple of laps with all "recovery" data. This means that I would drive the car towards the edge of the track, hit record, pull away from the edge of the track with a large steering angle, and then stop recording. The idea is to give the CNN examples of what to do in case the vehicle begins veering off the road since there aren't any examples of this scenario in normal straight biased driving. These images show what a recovery looks like starting from ... :
 4. and put 20% of the data into a validation set. 
 
-The car has three camera...one in the center, one on the left, and one on the rihgt. Here is an example of what the car sees from all three cameras.
+The car has three camera...one in the center, one on the left, and one on the right. Here is an example of what the car sees from all three cameras.
 
 ![alt text][image8]
+
 ![alt text][image9]
+
 ![alt text][image10]
 
 
@@ -156,15 +158,16 @@ The way Keras works, ```fit_generator()``` calls a user defined generator functi
 2. For the left and right cameras, there is no y-label provided in the driving log CSV file. Therefore, we have to create our own label by adding (for left camera) or subtracting (fro right camera) a fixed correction to the steering angle from the ceneter camera. This involved a lot of experimentation but I ultimately found a steering correctiong of 0.30 to work well for me.
 3. Augment each training image in the batch
     1. The most important thing I did was to flip my images and angles and append them to the data set. The great thing about this approach is that it pretty much replicates what the vehicle would see if it was driving on the track in the opposite direction.
-
-  ![alt text][image6]
-  ![alt text][image7]
-
     2. I also repeated some techniques from the traffic sign classfier lab (lab 2). I added a gaussian blurred and noisy versions of each image. I am not sure how quantifiably effective these methods were but it seems like I got enough good data.
     3. I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
     4. There are many more augmentation techniques which could have been used. However, you don't want to have a dataset larger than what you need to accomplish your task because of the increased time and complexity. I found that with these simple trechniques alone, I was successfully able to pull off a lap around the track. I did not attempt to drive around the challenge track but I know that it has varying lighting conditions that track 1 does not have. If I wanted the car to be able to drive around the challenge track, it would be a good idea to augment the training data with varying lighting conditions like I did in the traffic sign classifier project.
     
 4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. 
+
+Here's an example of some preprocessed images:
+
+![alt text][image6]
+![alt text][image7]
 
 #### Overfitting
 
