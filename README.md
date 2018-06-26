@@ -1,4 +1,4 @@
-# ** Autonomous Vehicle Behavioral Cloning** 
+# Autonomous Vehicle Behavioral Cloning
 
 [image7]: ./examples/parked_car.png "Autonomous Vehicle"
 
