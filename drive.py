@@ -47,7 +47,7 @@ controller = SimplePIController(0.1, 0.002)
 set_speed = 9
 controller.set_desired(set_speed)
 
-from test_network import preprocess
+from model import preprocess
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
