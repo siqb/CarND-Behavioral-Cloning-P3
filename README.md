@@ -33,8 +33,9 @@ The goals / steps of this project are to:
 [image14]: ./pics/cropped_gray.png "Cropped Grayscaled"
 [image15]: ./pics/resized.png "Resized"
 
-[image16]: ./pics/blurred.png "Blurred"
-[image17]: ./pics/noisy.png "Noisy"
+[image16]: ./pics/flipped.png "Flipped"
+[image17]: ./pics/blurred.png "Blurred"
+[image18]: ./pics/noisy.png "Noisy"
 
 
 ### This repo includes all required files to run the simulator in autonomous mode
