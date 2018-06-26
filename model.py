@@ -7,28 +7,60 @@ from sklearn.utils import shuffle
 def preprocess(input_img):
     """
     
+    This function is called during both training and inference.
+    
     Crop down the image in the rows (y) direction. As you can see,
     I tried many different ROIs. Every time I tried cropping in the
     cols (x) direction, a significant part of the lane lines would
     get cut out.
 
+    Used traditional methods rather than Keras API because I felt
+    more comfortable with this at the time.
+
+    Then grayscale, normalize, and resize. 
+
     """
+    #input_img_roi = input_img
     #input_img_roi = input_img[53:,]
     #input_img_roi = input_img[80:130,10:310]
     #input_img_roi = input_img[64:134,60:260]
+    
+    # Crop
     input_img_roi = input_img[64:134,]
-    #input_img_roi = input_img
-    #print("image shape", input_img_roi.shape)
+
+    # Grayscale
     output_img = cv2.cvtColor(input_img_roi, cv2.COLOR_RGB2GRAY)
+    
+    # Zero mean unit variance normalization
+    #output_img = (output_img/128)-1
     cv2.normalize(output_img, output_img, 0, 255, cv2.NORM_MINMAX)
+
+    # Resize to reduce dimensionality
     output_img = cv2.resize(output_img, (64, 64))
+
     return output_img
 
 def augment(input_img, input_angle):
+
+    """
+
+    Increase the training data set.
+
+    """
     
     output_images, output_angles = [],[]
 
-    # Add center camera flipped images and angles to data set
+    """
+
+    Fun fact: I had this condition around the data flipping code
+    but these function calls somehow SIGNIFICANTLY slowed down
+    the training process!!!
+
+    if ((abs(input_angle) < 0.2 and np.random.random() < 0.10) or 
+       (abs(input_angle) > 5.0 and np.random.random() < 0.70)) :
+
+    """
+    # Add flipped images and angles to data set
     image_flipped = np.fliplr(input_img)
     angle_flipped = -input_angle
     output_images.append(image_flipped)
@@ -48,16 +80,13 @@ def augment(input_img, input_angle):
 
     return output_images, output_angles
 
-def generator(samples, BATCH_SIZE=32, gen_type="train"):
-    print("in gen")
+def generator(samples, batch_size=32, gen_type="train"):
     num_samples = len(lines)
     while 1: # Loop forever so the generator never terminates
         sklearn.utils.shuffle(lines)
         for offset in range(0, num_samples, BATCH_SIZE):
             batch_samples = lines[offset:offset+BATCH_SIZE]
-
-            images = []
-            angles = []
+            images,angles = [],[]
             #CORRECTION = 0.15 # too much to the right (drives on right line)
             #CORRECTION = 1.15 # a little to the right
             #CORRECTION = 2.15 # all over the place
@@ -72,7 +101,7 @@ def generator(samples, BATCH_SIZE=32, gen_type="train"):
             for batch_sample in batch_samples:
                 for cam in range(0,3):
                     # Add center camera images and angles to data set
-                    img_name = '../data/IMG/'+batch_sample[cam].split('/')[-1]
+                    img_name = './training_data/IMG/'+batch_sample[cam].split('/')[-1]
                     img = cv2.imread(img_name)
                     img_gray_norm = preprocess(img)
                     if cam == CENTER:
@@ -83,31 +112,29 @@ def generator(samples, BATCH_SIZE=32, gen_type="train"):
                         img_angle = float(batch_sample[3]) - CORRECTION
                     images.append(img_gray_norm)
                     angles.append(img_angle)
-                    
                     # Augment
                     if gen_type == "train":
                         imgs_aug, angles_aug = augment(img_gray_norm, img_angle)
                         images += imgs_aug
                         angles += angles_aug
 
-            # trim image to only see section with road
             X_train = np.array(images)
             X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],X_train.shape[2],1)
             y_train = np.array(angles)
-            print("Total number of",gen_type,"samples in batch after data augmentation:", len(X_train)) 
+            #print("Total number of",gen_type,"samples in batch after data augmentation:", len(X_train)) 
             X_train, y_train = shuffle(X_train, y_train)
             yield X_train, y_train
  
 if __name__ == '__main__':
 
     lines = []
-    with open('../data/driving_log.csv') as csvfile:
+    with open('./training_data/driving_log.csv') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)
         for line in reader:
             #lines.append(line)
             temp_angle = float(line[3])
-            if((temp_angle > -0.2 or temp_angle < 0.2) and np.random.random() < 0.50):
+            if((temp_angle > -0.3 or temp_angle < 0.3) and np.random.random() < 0.20):
                 continue
             lines.append(line)
     
@@ -115,27 +142,31 @@ if __name__ == '__main__':
     from sklearn.model_selection import train_test_split
     train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
-    BATCH_SIZE = 32 
+    BATCH_SIZE = 128 
     train_generator = generator(train_samples, batch_size=BATCH_SIZE, gen_type="train")
     validation_generator = generator(validation_samples, batch_size=BATCH_SIZE, gen_type="valid")
 
     print("Total number of training samples before data augmentation:", len(train_samples)) 
     print("Total number of validation samples before data augmentation:", len(validation_samples)) 
     
+    """
+
+    # Cropping speed up training by a significant amount 
+    # Cropping also helps the car get farther on the track
+    # However, I decided not to use the Keras function for cropping
+    # and perform it manually in drive.py instead
+
+    # Adding in strides (subsamples) and increasing batch size 8->32 
+    # sped up my training from ~1 hour to about ~1 minute!
+
+    """
+
     from keras.models import Sequential
     from keras.layers import Flatten, Dense, Lambda, Convolution2D, Activation, Cropping2D, BatchNormalization, Dropout
     from keras.utils.visualize_util import plot
     from keras.models import load_model
     
     model = Sequential()
-    # Cropping speed up training by ~40 seconds
-    # Cropping also helps the car get farther on the track
-    # However, I decided not to use the Keras function for cropping
-    # and perform it manually in drive.py instead
-
-    # Adding in strides (subsamples) and increasing batch size 8->32 
-    # sped up my training from ~1 hour to about ~1 minute
-    
     model.add(Convolution2D(24,5,5,subsample=(2, 2), input_shape=(64,64,1)))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
@@ -164,7 +195,6 @@ if __name__ == '__main__':
     model.add(Dense(1)) # Erratic driving
     model.compile(loss='mse', optimizer='adam')
     
-    import matplotlib.pyplot as plt
     
     trained_model = model.fit_generator(
        train_generator, 
@@ -178,6 +208,7 @@ if __name__ == '__main__':
     ### print the keys contained in the history object
     print(trained_model.history.keys())
     
+    import matplotlib.pyplot as plt
     ### plot the training and validation loss for each epoch
     plt.plot(trained_model.history['loss'])
     plt.plot(trained_model.history['val_loss'])
