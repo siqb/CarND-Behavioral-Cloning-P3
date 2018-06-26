@@ -1,6 +1,6 @@
 # Autonomous Vehicle Behavioral Cloning
 
-[image7]: ./examples/parked_car.png "Autonomous Vehicle"
+![alt text][image11]
 
 ---
 **Behavioral Cloning Project**
@@ -21,6 +21,14 @@ The goals / steps of this project are to:
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
+
+
+[image8]: ./pics/center_2016_12_01_13_30_48_287.jpg "Center Camera Image"
+[image9]: ./pics/left_2016_12_01_13_30_48_287.jpg "Left Camera Image"
+[image10]: ./pics/right_2016_12_01_13_30_48_287.jpg "Right Camera Image"
+[image11]: ./pics/parked_car.png "Autonomous Vehicle"
+[image12]: ./pics/simulator.png "Simulator"
+[image13]: ./pics/cnn-architecture-624x890.png "Simulator"
 
 
 ### This repo includes all required files to run the simulator in autonomous mode
@@ -46,7 +54,7 @@ Next, you can test the pre-trained neural network found in the repo simply by ex
 
 Now just launch the simulator and click "Autonomous Mode" and watch the autonomous magic begin.
 
-[image7]: ./examples/simulator.png "Autonomous Vehicle"
+![alt text][image12]
 
 ### Model Architecture and Training Strategy
 
@@ -62,7 +70,7 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 I replicated the NVIDIA architecture with some modifications. As I mentioned above, I built it up backwards, from the last layer to the first which is a painfully slow way of doing it. For reference, here is a diagram of the architecture as published on the NVIDIA blog:
 
-![alt text][image6]
+![alt text][image13]
 
 Here's how my implementation looks in code:
 
