@@ -129,9 +129,11 @@ The data collected by driving around the track is biased towards driving straigh
 3. Drive a couple of laps with all "recovery" data. This means that I would drive the car towards the edge of the track, hit record, pull away from the edge of the track with a large steering angle, and then stop recording. The idea is to give the CNN examples of what to do in case the vehicle begins veering off the road since there aren't any examples of this scenario in normal straight biased driving. These images show what a recovery looks like starting from ... :
 4. and put 20% of the data into a validation set. 
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+The car has three camera...one in the center, one on the left, and one on the rihgt. Here is an example of what the car sees from all three cameras.
+
+![alt text][image8]
+![alt text][image9]
+![alt text][image10]
 
 
 I did **not** repeat this process on track two in order to get more data points. I found the data I collected from track 1 to be sufficient for the purpose of driving a lap around track 1. To expand the data set, I repeated some augmentation techniques from Lab 2. lsAfter the collection process, I had many data points. I then preprocessed this data by running it through a short pipeline:
