@@ -2,6 +2,9 @@ import csv
 import cv2
 import numpy as np
 from sklearn.utils import shuffle
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import sys
 
 
 def preprocess(input_img):
@@ -30,13 +33,19 @@ def preprocess(input_img):
 
     # Grayscale
     output_img = cv2.cvtColor(input_img_roi, cv2.COLOR_RGB2GRAY)
+    #cv2.imshow('img', output_img)
+    #cv2.waitKey(0);    
     
     # Zero mean unit variance normalization
     #output_img = (output_img/128)-1
     cv2.normalize(output_img, output_img, 0, 255, cv2.NORM_MINMAX)
+    #cv2.imshow('img', output_img)
+    #cv2.waitKey(0);    
 
     # Resize to reduce dimensionality
     output_img = cv2.resize(output_img, (64, 64))
+    #cv2.imshow('img', output_img)
+    #cv2.waitKey(0);    
 
     return output_img
 
@@ -124,8 +133,26 @@ def generator(samples, batch_size=32, gen_type="train"):
             #print("Total number of",gen_type,"samples in batch after data augmentation:", len(X_train)) 
             X_train, y_train = shuffle(X_train, y_train)
             yield X_train, y_train
+
+def generate_static_images():
+    # Add center camera images and angles to data set
+    img_name = './pics/left_2016_12_01_13_30_48_287.jpg'
+    img = cv2.imread(img_name)
+    img_gray_norm = preprocess(img)
+    cv2.imshow('img', img_gray_norm)
+    cv2.waitKey(0);    
+    #plt.imshow(img_gray_norm)
+    # Augment
+    imgs_aug, angles_aug = augment(img_gray_norm, 0)
+    for aug in imgs_aug:
+        cv2.imshow('img', aug)
+        cv2.waitKey(0);    
  
 if __name__ == '__main__':
+    
+    if sys.argv[1] == "img":
+        generate_static_images()
+        sys.exit()
 
     lines = []
     with open('./training_data/driving_log.csv') as csvfile:
@@ -195,7 +222,6 @@ if __name__ == '__main__':
     model.add(Dense(1)) # Erratic driving
     model.compile(loss='mse', optimizer='adam')
     
-    
     trained_model = model.fit_generator(
        train_generator, 
        samples_per_epoch = ((len(train_samples)*12)//BATCH_SIZE)*BATCH_SIZE,
@@ -208,7 +234,6 @@ if __name__ == '__main__':
     ### print the keys contained in the history object
     print(trained_model.history.keys())
     
-    import matplotlib.pyplot as plt
     ### plot the training and validation loss for each epoch
     plt.plot(trained_model.history['loss'])
     plt.plot(trained_model.history['val_loss'])
