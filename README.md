@@ -23,7 +23,7 @@ The goals / steps of this project are to:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 
-#### This repo includes all required files to run the simulator in autonomous mode
+### This repo includes all required files to run the simulator in autonomous mode
 
 This repo contains the following files:
 
@@ -36,7 +36,7 @@ This repo contains the following files:
 * output_video.mp4 - video of the car _**safely**_ doing a lap around track 1
 * linux_sim.zip - the simulator provided by Udacity for collecting data and driving the vehicle autonomously around the track
 
-## How to Run the Model
+#### How to Run the Model
 
 First, download and install the Udacity starter kit for term 1 from here: https://github.com/siqb/CarND-Term1-Starter-Kit.
 
@@ -102,13 +102,13 @@ The main differences from the published architecture are:
 
 A critical addition that I left out, which in retrospect I was probably errant to exclude, is the max pooling layer. Max pooling allows the network to reduce dimensionality of the data after each convolutional layer. Less trainable parameters means less training time. Less training time means more time for rapid experimentation! More experimentaion means more knowledge and intuition gained. Lesson learned. I will go back and benchmark the difference in training time when using max pooling layers. 
 
-##### Preprocessing
+#### Preprocessing
 
 I did not use the Keras ```Lambda``` layer for data normalization or the Keras ```Cropping2D``` for cropping because I implemented a seperate preprocessing function using more traditional techniques to perform these tasks instead. This same preprocessing function is called during training and inference. There may be a performance penalty to using this approach over Keras but I chose this way because I felt more comfortable with it at the time. If I were to go back and redo this part, I would try in Keras and benchmark the performance difference. 
 
-#### Creation of the Training Set & Training Process
+### Creation of the Training Set & Training Process
 
-##### Data Collection
+#### Data Collection
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road as was recommended by the course lectures
 
@@ -130,7 +130,7 @@ I did **not** repeat this process on track two in order to get more data points.
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set.
 
-##### CNN Training
+#### CNN Training
 
 The way Keras works, ```fit_generator()``` calls a user defined generator function which yields the training samples on a batch by batch basis until all of the training data is exhausted. The generator pipeline has several basic functions:
 
@@ -156,19 +156,19 @@ The way Keras works, ```fit_generator()``` calls a user defined generator functi
     
 4. I finally randomly shuffled the data batch before yielding it back to the Keras fit_generator. 
 
-##### Overfitting
+#### Overfitting
 
 To reduce overfitting, I used dropout. I started with a keep probability of 50% but through experimentation, I dropped it to 10%. 
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-##### Parameter Tuning
+#### Parameter Tuning
 
 I was able to pull off a successful lap using only five epochs to train. It's possible that more epochs could have lead to better driving behavior but this comes at a very steep cost: increased training time. A few minutes extra may not sound like much, but I already sunk massive amounts of time fine tuning and testing the CNN. Between work and family, time is already at a premium. Shaving off even a few minutes of training time compounds into several hours of savings in the long run. Again, knowing how to balance trade-offs is part of the art of deep learning and this was the ideal lesson to teach me that.
 
 The model used an adam optimizer, so the learning rate was not tuned manually. I used an adam optimizer so that manually training the learning rate wasn't necessary. I read about ways to play with the learning rate even while using the Adam optimizer and at one point was tempted to do so. But I decided that my time was better spent pursuing bigger gains. Alas, I have learned that knowing when to make such judgement calls is part of the art of deep learning.
 
-##### Training Time
+#### Training Time
 
 As alluded to several times throughout this write up, the main problem I had with this lab was the inability to do fast iterations of experiments. It is well known that deep learning is largely experimental...but it's hard to experiment if it takes too long to train!
 
